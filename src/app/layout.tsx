@@ -35,8 +35,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased selection:bg-blue-500/30">
         <Providers>
-          <div className="flex flex-col min-h-[100dvh] relative overflow-hidden bg-[#020408]">
+          <div className="app-shell flex min-h-[100dvh] flex-col overflow-hidden">
             <div className="app-mesh" />
+            <div className="app-grid absolute inset-0 opacity-30" />
 
             <main className="flex-1 w-full relative z-10">
               {children}
