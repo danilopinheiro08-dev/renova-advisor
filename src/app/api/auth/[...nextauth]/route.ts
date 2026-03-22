@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
     providers: [
@@ -7,6 +8,18 @@ const handler = NextAuth({
             clientId: process.env.GOOGLE_CLIENT_ID || "",
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
         }),
+        CredentialsProvider({
+            name: "Acesso de Teste (Mock)",
+            credentials: {
+                username: { label: "Seu Nome", type: "text", placeholder: "Qualquer nome..." },
+            },
+            async authorize(credentials) {
+                if (credentials?.username) {
+                    return { id: "1", name: credentials.username, email: "teste@renova.com" };
+                }
+                return null;
+            }
+        })
     ],
     session: {
         strategy: "jwt",

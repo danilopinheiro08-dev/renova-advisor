@@ -1,33 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navigation from "@/components/Navigation";
 import { Providers } from "@/components/Providers";
-import { PinLock } from "@/components/PinLock";
-import { Navigation } from "@/components/Navigation";
-import { TopBar } from "@/components/TopBar";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
-  title: "Renova Advisor",
-  description: "Swiss Army Knife for Financial Advisors",
+  title: "Renova Advisor | Premium",
+  description: "A ferramenta definitiva para o assessor de elite.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Renova Advisor",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0F172A",
+  themeColor: "#020408",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -36,19 +29,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
-    >
-      <body className="min-h-full flex flex-col bg-slate-900 text-slate-50">
+    <html lang="pt-BR">
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body className="antialiased selection:bg-blue-500/30">
         <Providers>
-          <PinLock>
-            <TopBar />
-            <main className="flex-1 max-w-md w-full mx-auto pt-14 pb-16 min-h-screen border-x border-slate-800 shadow-2xl bg-slate-900 relative">
+          <div className="flex flex-col min-h-[100dvh] relative overflow-hidden bg-[#020408]">
+            <div className="app-mesh" />
+
+            <main className="flex-1 w-full relative z-10">
               {children}
             </main>
+
             <Navigation />
-          </PinLock>
+          </div>
         </Providers>
       </body>
     </html>
