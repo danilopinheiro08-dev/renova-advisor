@@ -1,16 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-dark: #05070a;
-  --bg-card: #0c111d;
-  --accent-blue: #3b82f6;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --border-subtle: rgba(255, 255, 255, 0.05);
+  --bg-dark: #090b2a;
+  --bg-dark-secondary: #111542;
+  --bg-panel: linear-gradient(180deg, rgba(31, 38, 97, 0.98) 0%, rgba(19, 25, 74, 0.96) 100%);
+  --bg-panel-soft: linear-gradient(180deg, rgba(23, 28, 83, 0.94) 0%, rgba(17, 21, 64, 0.94) 100%);
+  --accent-primary: #67f0d7;
+  --accent-secondary: #63a4ff;
+  --text-primary: #f4f7ff;
+  --text-secondary: #a3addd;
+  --text-tertiary: #6d75a6;
+  --border-subtle: rgba(146, 160, 255, 0.18);
+  --shadow-deep: 18px 18px 40px rgba(3, 7, 34, 0.48);
+  --shadow-inner: inset 1px 1px 0 rgba(255, 255, 255, 0.05), inset -1px -1px 0 rgba(13, 19, 60, 0.4);
 }
 
 * {
@@ -19,12 +25,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  background:
+    radial-gradient(circle at top left, rgba(88, 172, 255, 0.16), transparent 28%),
+    radial-gradient(circle at top right, rgba(103, 240, 215, 0.14), transparent 22%),
+    linear-gradient(180deg, #090b2a 0%, #0d1036 48%, #08091f 100%);
+}
+
 body {
-  background-color: var(--bg-dark);
+  background: transparent;
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
-  height: 100dvh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
 }
@@ -34,66 +47,130 @@ h2,
 h3,
 h4 {
   font-family: 'Outfit', sans-serif;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
 @layer components {
+  .app-shell {
+    position: relative;
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(103, 240, 215, 0.08), transparent 18%),
+      radial-gradient(circle at 80% 0%, rgba(99, 164, 255, 0.12), transparent 20%),
+      linear-gradient(180deg, rgba(7, 10, 33, 0.78) 0%, rgba(8, 10, 31, 0.98) 100%);
+  }
 
-  /* Clean Premium Card */
+  .app-mesh {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(103, 240, 215, 0.12), transparent 18%),
+      radial-gradient(circle at 85% 5%, rgba(99, 164, 255, 0.16), transparent 20%),
+      radial-gradient(circle at 50% 120%, rgba(63, 88, 255, 0.2), transparent 35%);
+    filter: blur(6px);
+    opacity: 0.95;
+  }
+
+  .app-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 95%);
+  }
+
   .premium-card {
-    background: var(--bg-card);
-    border-radius: 20px;
-    padding: 1.25rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: var(--bg-panel);
+    border-radius: 28px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-deep), var(--shadow-inner);
+    backdrop-filter: blur(24px);
   }
 
-  .premium-card:active {
-    transform: scale(0.98);
+  .glass-card {
+    background: var(--bg-panel-soft);
+    border: 1px solid rgba(163, 173, 221, 0.14);
+    box-shadow: 16px 16px 38px rgba(4, 8, 37, 0.48), -8px -8px 24px rgba(80, 94, 191, 0.08), var(--shadow-inner);
+    backdrop-filter: blur(28px);
   }
 
-  /* Clean Professional Button */
+  .stat-orb {
+    background: radial-gradient(circle at 30% 30%, rgba(103, 240, 215, 0.3), rgba(103, 240, 215, 0.1) 36%, rgba(103, 240, 215, 0.02) 68%, transparent 72%);
+    box-shadow: 0 0 0 1px rgba(103, 240, 215, 0.12), 0 0 30px rgba(103, 240, 215, 0.15);
+  }
+
+  .accent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(103, 240, 215, 0.08);
+    color: var(--accent-primary);
+    border: 1px solid rgba(103, 240, 215, 0.12);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
   .app-button {
-    background: var(--accent-blue);
-    color: white;
-    font-weight: 600;
-    padding: 0.875rem 1.5rem;
-    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, #60cfff 100%);
+    color: #081126;
+    font-weight: 800;
+    padding: 0.95rem 1.35rem;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    transition: opacity 0.2s;
+    gap: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 14px 30px rgba(64, 198, 243, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   }
 
   .app-button:active {
-    opacity: 0.8;
+    transform: translateY(1px) scale(0.99);
+    opacity: 0.92;
   }
 
-  /* Simplified Bottom Dock */
+  .app-button-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    border: 1px solid rgba(163, 173, 221, 0.12);
+    box-shadow: var(--shadow-inner);
+  }
+
   .app-dock {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background: rgba(10, 15, 25, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid var(--border-subtle);
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    width: calc(100% - 1.5rem);
+    max-width: 28rem;
+    padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(20, 26, 76, 0.88) 0%, rgba(10, 13, 39, 0.92) 100%);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(130, 145, 242, 0.18);
+    box-shadow: 0 18px 40px rgba(2, 6, 29, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    padding: 0 10px;
+    justify-content: space-between;
+    gap: 0.5rem;
     z-index: 50;
   }
 }
 
-/* Page Transitions */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
 
   to {
@@ -103,21 +180,28 @@ h4 {
 }
 
 .animate-page {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn 0.45s ease-out forwards;
 }
 
-/* Standardize Icon Sizes & Styles */
 .icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 8px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(163, 173, 221, 0.14);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.06), inset -1px -1px 0 rgba(8, 10, 31, 0.45);
+  padding: 0.85rem;
   color: var(--text-secondary);
 }
 
-/* Force No Horizontal Scroll */
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #93f5df 45%, #87b7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .no-x-scroll {
   overflow-x: hidden !important;
   width: 100% !important;

@@ -1,196 +1,236 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SecureStorage } from "@/lib/storage";
-import { Plus, Trash2, Users, TrendingUp, ShieldCheck, ChevronRight, X, User } from "lucide-react";
+import {
+  Activity,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  User,
+  Users,
+  Wallet,
+  X,
+} from "lucide-react";
 
 interface Client {
-    id: string;
-    name: string;
-    risk: string;
-    aum: number;
+  id: string;
+  name: string;
+  risk: string;
+  aum: number;
 }
 
+const riskStyles: Record<string, string> = {
+  Arrojado: "bg-orange-400/10 text-orange-200 border-orange-300/20",
+  Moderado: "bg-cyan-300/10 text-cyan-100 border-cyan-300/20",
+  Conservador: "bg-emerald-400/10 text-emerald-200 border-emerald-300/20",
+};
+
 export default function PortfolioPage() {
-    const [clients, setClients] = useState<Client[]>([]);
-    const [showAdd, setShowAdd] = useState(false);
-    const [newName, setNewName] = useState("");
-    const [newRisk, setNewRisk] = useState("Moderado");
-    const [newAum, setNewAum] = useState("");
+  const [clients, setClients] = useState<Client[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newRisk, setNewRisk] = useState("Moderado");
+  const [newAum, setNewAum] = useState("");
 
-    useEffect(() => {
-        loadClients();
-    }, []);
-
+  useEffect(() => {
     const loadClients = async () => {
-        const data = await SecureStorage.getItem<Client[]>("portfolio_clients");
-        if (data) setClients(data);
+      const data = await SecureStorage.getItem<Client[]>("portfolio_clients");
+      if (data) setClients(data);
     };
 
-    const addClient = async () => {
-        if (!newName || !newAum) return;
-        const newClient: Client = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: newName,
-            risk: newRisk,
-            aum: Number(newAum),
-        };
-        const updated = [...clients, newClient];
-        await SecureStorage.setItem("portfolio_clients", updated);
-        setClients(updated);
-        setNewName("");
-        setNewAum("");
-        setShowAdd(false);
+    void loadClients();
+  }, []);
+
+  const addClient = async () => {
+    if (!newName || !newAum) return;
+
+    const newClient: Client = {
+      id: Math.random().toString(36).slice(2, 11),
+      name: newName,
+      risk: newRisk,
+      aum: Number(newAum),
     };
 
-    const deleteClient = async (id: string) => {
-        const updated = clients.filter(c => c.id !== id);
-        await SecureStorage.setItem("portfolio_clients", updated);
-        setClients(updated);
-    };
+    const updated = [...clients, newClient];
+    await SecureStorage.setItem("portfolio_clients", updated);
+    setClients(updated);
+    setNewName("");
+    setNewAum("");
+    setShowAdd(false);
+  };
 
-    const totalAum = clients.reduce((acc, c) => acc + c.aum, 0);
+  const deleteClient = async (id: string) => {
+    const updated = clients.filter((client) => client.id !== id);
+    await SecureStorage.setItem("portfolio_clients", updated);
+    setClients(updated);
+  };
 
-    return (
-        <div className="flex flex-col h-full bg-mesh absolute inset-0 pb-20 pt-16 p-5 overflow-y-auto">
-            {/* Header Profile Style */}
-            <div className="flex items-center justify-between mb-8 px-1">
-                <div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">Portfólio</h1>
-                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Gestão de Alocação</p>
-                </div>
-                <button
-                    onClick={() => setShowAdd(true)}
-                    className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all"
-                >
-                    <Plus size={24} />
-                </button>
-            </div>
+  const totalAum = useMemo(() => clients.reduce((acc, client) => acc + client.aum, 0), [clients]);
+  const averageTicket = clients.length ? totalAum / clients.length : 0;
 
-            {/* Stats Overview */}
-            <div className="glass-card rounded-[32px] p-6 mb-8 relative overflow-hidden">
-                <div className="absolute top-[-20%] right-[-10%] w-40 h-40 bg-emerald-500/10 rounded-full blur-[60px] animate-pulse"></div>
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Users size={20} className="text-slate-400" />
-                    </div>
-                    <div className="flex-1">
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Total de Clientes</p>
-                        <h3 className="text-lg font-bold text-white mt-1">{clients.length} Investidores</h3>
-                    </div>
-                </div>
-
-                <div className="space-y-1">
-                    <p className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">AUM Consolidado</p>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-bold text-slate-500">R$</span>
-                        <h2 className="text-3xl font-black text-white tracking-tighter drop-shadow-sm">
-                            {totalAum.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                        </h2>
-                    </div>
-                </div>
-            </div>
-
-            {/* Client List */}
-            <div className="space-y-4 px-1 pb-10">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Lista de Contatos</h3>
-                    <span className="text-[10px] bg-white/10 border border-white/10 text-white px-2.5 py-1 rounded-full font-bold">A-Z</span>
-                </div>
-
-                {clients.length === 0 ? (
-                    <div className="glass-card rounded-[28px] p-10 text-center border-dashed opacity-60">
-                        <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                        <p className="text-slate-400 font-medium text-sm">Nenhum cliente cadastrado localmente.</p>
-                    </div>
-                ) : (
-                    clients.map(client => (
-                        <div key={client.id} className="glass-card rounded-[28px] p-5 flex items-center gap-4 group hover:bg-white/[0.05] transition-all">
-                            <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
-                                <User size={20} className="text-slate-400 group-hover:text-blue-400 transition-colors" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className="text-white font-bold leading-tight truncate tracking-tight">{client.name}</h4>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase border tracking-widest ${client.risk === 'Arrojado' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
-                                            client.risk === 'Moderado' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                        }`}>
-                                        {client.risk}
-                                    </span>
-                                    <span className="text-slate-500 text-[11px] font-bold">R$ {client.aum.toLocaleString()}</span>
-                                </div>
-                            </div>
-                            <button onClick={() => deleteClient(client.id)} className="w-9 h-9 flex items-center justify-center text-slate-700 hover:text-red-400 transition-colors">
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                    ))
-                )}
-            </div>
-
-            {/* Add Client Modal Overlay */}
-            {showAdd && (
-                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="glass-card w-full max-w-lg rounded-[40px] p-8 shadow-[0_32px_128px_rgba(0,0,0,0.8)] border-white/20 animate-in slide-in-from-bottom-20 duration-500">
-                        <div className="flex justify-between items-center mb-10">
-                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                                <Plus size={24} className="text-white" />
-                            </div>
-                            <button onClick={() => setShowAdd(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
-                                <X size={20} className="text-slate-400" />
-                            </button>
-                        </div>
-
-                        <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Novo Investidor</h2>
-                        <p className="text-slate-400 text-sm mb-8 font-medium">Os dados serão criptografados e salvos localmente.</p>
-
-                        <div className="space-y-6">
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 block ml-1">Iniciais ou Apelido</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ex: J. Silva"
-                                    value={newName}
-                                    onChange={e => setNewName(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white focus:border-blue-500/50 outline-none transition-all shadow-inner"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 block ml-1">Capital (AUM)</label>
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={newAum}
-                                        onChange={e => setNewAum(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white focus:border-blue-500/50 outline-none transition-all shadow-inner"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 block ml-1">Risk Profile</label>
-                                    <select
-                                        value={newRisk}
-                                        onChange={e => setNewRisk(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white focus:border-blue-500/50 outline-none transition-all shadow-inner appearance-none"
-                                    >
-                                        <option value="Conservador">Conservador</option>
-                                        <option value="Moderado">Moderado</option>
-                                        <option value="Arrojado">Arrojado</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={addClient}
-                                className="w-full py-4 bg-white text-black rounded-2xl font-black text-lg mt-4 shadow-xl active:scale-95 transition-all hover:bg-slate-200"
-                            >
-                                Salvar Localmente
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+  return (
+    <div className="animate-page mx-auto flex min-h-full w-full max-w-xl flex-col px-4 pb-32 pt-6 sm:px-5">
+      <section className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <div className="accent-chip mb-4 w-fit">
+            <ShieldCheck size={14} />
+            Portfolio desk
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-white">Portfólio</h1>
+          <p className="mt-3 max-w-sm text-sm leading-6 text-[var(--text-secondary)]">
+            Uma área de carteira mais refinada, com cards volumétricos e leitura rápida para perfil, base ativa e AUM consolidado.
+          </p>
         </div>
-    );
+
+        <button onClick={() => setShowAdd(true)} className="app-button h-14 w-14 shrink-0 rounded-[22px] p-0">
+          <Plus size={22} />
+        </button>
+      </section>
+
+      <section className="glass-card relative mb-6 overflow-hidden rounded-[32px] p-6">
+        <div className="absolute right-[-10%] top-[-18%] h-36 w-36 rounded-full bg-cyan-300/10 blur-[80px]" />
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[var(--text-tertiary)]">Resumo consolidado</p>
+            <h2 className="mt-2 text-3xl font-extrabold text-white">R$ {totalAum.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</h2>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">AUM consolidado da operação local.</p>
+          </div>
+          <div className="stat-orb flex h-16 w-16 items-center justify-center rounded-full text-cyan-200">
+            <Wallet size={20} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Clientes", value: String(clients.length), icon: Users },
+            { label: "Ticket médio", value: `R$ ${averageTicket.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`, icon: Activity },
+            { label: "Sigilo", value: "Local", icon: ShieldCheck },
+          ].map((item) => (
+            <div key={item.label} className="rounded-[22px] border border-white/10 bg-white/5 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="icon-container p-3 text-cyan-200">
+                  <item.icon size={16} />
+                </div>
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-tertiary)]">{item.label}</p>
+              <p className="mt-2 text-sm font-bold text-white">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-4 flex items-center justify-between px-1">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-tertiary)]">Base local</p>
+          <h3 className="mt-1 text-xl font-bold text-white">Investidores cadastrados</h3>
+        </div>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+          A-Z
+        </span>
+      </section>
+
+      <section className="space-y-4 pb-4">
+        {clients.length === 0 ? (
+          <div className="premium-card rounded-[30px] p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] border border-white/10 bg-white/5 text-[var(--text-tertiary)]">
+              <Users size={24} />
+            </div>
+            <p className="text-base font-bold text-white">Nenhum investidor cadastrado.</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+              Adicione clientes para começar a usar a nova experiência visual do módulo de portfólio.
+            </p>
+          </div>
+        ) : (
+          clients.map((client) => (
+            <div key={client.id} className="premium-card flex items-center gap-4 rounded-[30px] p-5">
+              <div className="icon-container text-cyan-200">
+                <User size={20} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 className="truncate text-base font-bold text-white">{client.name}</h4>
+                    <p className="mt-1 text-sm text-[var(--text-secondary)]">R$ {client.aum.toLocaleString("pt-BR")}</p>
+                  </div>
+                  <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${riskStyles[client.risk] ?? riskStyles.Moderado}`}>
+                    {client.risk}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => deleteClient(client.id)}
+                className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/5 text-[var(--text-tertiary)] transition-colors hover:text-red-300"
+                aria-label={`Remover ${client.name}`}
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ))
+        )}
+      </section>
+
+      {showAdd && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-[#040612]/80 p-4 backdrop-blur-md sm:items-center">
+          <div className="glass-card w-full max-w-lg rounded-[36px] p-6 sm:p-8">
+            <div className="mb-8 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-tertiary)]">Novo cliente</p>
+                <h2 className="mt-2 text-2xl font-extrabold text-white">Adicionar investidor</h2>
+              </div>
+              <button
+                onClick={() => setShowAdd(false)}
+                className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-white/10 bg-white/5 text-[var(--text-secondary)]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <label className="block">
+                <span className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-tertiary)]">Nome de exibição</span>
+                <input
+                  type="text"
+                  placeholder="Ex: J. Silva"
+                  value={newName}
+                  onChange={(event) => setNewName(event.target.value)}
+                  className="w-full rounded-[22px] border border-white/10 bg-[#0a1036]/75 px-4 py-4 text-white outline-none transition focus:border-cyan-300/40"
+                />
+              </label>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-tertiary)]">Capital (AUM)</span>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={newAum}
+                    onChange={(event) => setNewAum(event.target.value)}
+                    className="w-full rounded-[22px] border border-white/10 bg-[#0a1036]/75 px-4 py-4 text-white outline-none transition focus:border-cyan-300/40"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 ml-1 block text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-tertiary)]">Perfil de risco</span>
+                  <select
+                    value={newRisk}
+                    onChange={(event) => setNewRisk(event.target.value)}
+                    className="w-full rounded-[22px] border border-white/10 bg-[#0a1036]/75 px-4 py-4 text-white outline-none transition focus:border-cyan-300/40"
+                  >
+                    <option value="Conservador">Conservador</option>
+                    <option value="Moderado">Moderado</option>
+                    <option value="Arrojado">Arrojado</option>
+                  </select>
+                </label>
+              </div>
+
+              <button onClick={addClient} className="app-button mt-2 w-full">
+                Salvar localmente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
